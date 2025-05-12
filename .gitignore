@@ -1,0 +1,78 @@
+# 编译产物
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.so
+
+# 虚拟环境
+venv/
+env/
+.python-version
+
+# IDE配置
+.idea/
+.vscode/
+*.code-workspace
+
+# 依赖管理
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+
+# 测试覆盖
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# 日志与数据
+*.log
+*.sqlite
+*.db
+
+# 系统文件
+.DS_Store
+Thumbs.db
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
