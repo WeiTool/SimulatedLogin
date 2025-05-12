@@ -7,7 +7,10 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Map;
+import java.util.Scanner;
+
 import com.google.gson.Gson;
 
 public class Main {
@@ -21,12 +24,36 @@ public class Main {
     private static final int UTYPE = 1;
 
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("请选择操作：");
+        System.out.println("1. 登录");
+        System.out.println("2. 退出");
+        System.out.print("请输入数字 (1/2): ");
+
+        int choice;
+        try {
+            choice = scanner.nextInt();
+        } catch (InputMismatchException e) {
+            System.out.println("错误：请输入数字 1 或 2");
+            return;
+        }
+
         String username = "yourUsername@ctc";//修改成自己的用户名 @ctc是宿舍区域 @ynufe是教学区域
         String password = "yourPassword";//修改成自己的密码
+
         try {
-            Map<String, Object> result = login(username, password, "", true);
-            Gson gson = new Gson();
-            System.out.println(gson.toJson(result));
+            switch (choice) {
+                case 1:
+                    Map<String, Object> loginResult = login(username, password, "", true);
+                    System.out.println(new Gson().toJson(loginResult));
+                    break;
+                case 2:
+                    Map<String, Object> logoutResult = logout(username, "", true);
+                    System.out.println(new Gson().toJson(logoutResult));
+                    break;
+                default:
+                    System.out.println("错误：无效选项，请输入 1 或 2");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -68,6 +95,27 @@ public class Main {
         return result;
     }
 
+    public static Map<String, Object> logout(String username, String clientIp, boolean autoDetect) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            // 自动检测IP逻辑
+            if (autoDetect && (clientIp == null || clientIp.isEmpty())) {
+                clientIp = detectIp(username); // 复用IP检测方法
+                System.out.println("自动检测到 IP: " + clientIp);
+            }
+
+            // 构建注销URL
+            String url = buildLogoutUrl(username, clientIp);
+            String response = sendGetRequest(url); // 发送HTTP GET请求
+
+            result = parseJsonp(response); // 解析响应
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+            result.put("ecode", -1);
+        }
+        return result;
+    }
+
     private static String getInfo(String username, String password, String ip, String token) {
         String infoJson = String.format(
                 "{\"username\":\"%s\",\"password\":\"%s\",\"ip\":\"%s\",\"acid\":%d,\"enc_ver\":\"%s\"}",
@@ -90,6 +138,15 @@ public class Main {
                 + "&n=" + N
                 + "&type=" + UTYPE
                 + "&_=" + (System.currentTimeMillis() / 1000);
+    }
+
+    private static String buildLogoutUrl(String username, String clientIp) {
+        return SRUN_PORTAL_API + "?callback=sdu"
+                + "&action=logout"
+                + "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8)
+                + "&ip=" + URLEncoder.encode(clientIp, StandardCharsets.UTF_8)
+                + "&ac_id=" + AC_ID
+                + "&_=" + (System.currentTimeMillis() / 1000); // 时间戳参数
     }
 
     private static String sendGetRequest(String url) throws IOException {

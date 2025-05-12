@@ -128,11 +128,77 @@ def login(username: str, password: str, client_ip: str = "", auto_detect: bool =
 
         return {"error": str(e), "ecode": -1}
 
+# ---------------------------- 新增注销功能 ----------------------------
+def logout(username: str, client_ip: str = "", auto_detect: bool = True) -> Dict:
+    try:
+        if auto_detect and not client_ip:
+            client_ip = detect_ip(username)
+            print(f"自动检测到 IP: {client_ip}")
 
+        params = {
+            "callback": "sdu",
+            "action": "logout",
+            "username": username,
+            "ip": client_ip,
+            "ac_id": str(ac_id),
+            "_": str(int(time.time()))
+        }
+
+        response = requests.get(srun_portal_api, params=params, headers=header)
+        return json.loads(response.text[4:-1])
+    except Exception as e:
+        return {"error": str(e), "ecode": -1}
+
+# ---------------------------- IP 检测逻辑 ----------------------------
+def detect_ip(username: str) -> str:
+    try:
+        params = {
+            "callback": "sdu",
+            "username": username,
+            "ip": "",
+            "_": int(time.time() - 2)
+        }
+        response = requests.get(get_challenge_api, params=params, headers=header, timeout=5)
+        response.raise_for_status()
+        raw_text = response.text
+        if not raw_text.startswith("sdu(") or not raw_text.endswith(")"):
+            raise ValueError("Invalid JSONP response")
+        data = json.loads(raw_text[4:-1])
+        if "online_ip" not in data or not data["online_ip"]:
+            raise ValueError("服务器未返回 online_ip 字段")
+        return data["online_ip"]
+    except Exception as e:
+        print(f"[WARN] 自动检测 IP 失败: {str(e)}，尝试本地获取 IP")
+        return get_local_ip()
+
+def get_local_ip() -> str:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except:
+        return "0.0.0.0"
+
+# ---------------------------- 主流程 ----------------------------
 if __name__ == "__main__":
-    username = "yourUsername@ctc"#修改成自己的用户名 @ctc是宿舍区域 @ynufe是教学区域
-    password = "yourPassword"#修改成自己的密码
+    # 用户交互菜单
+    print("请选择操作：")
+    print("1. 登录")
+    print("2. 退出")
+    choice = input("请输入数字 (1/2): ")
 
-    result = login(username, password, auto_detect=True)
+    username = "yourUsername@ctc"  # 修改为自己的用户名 @ctc是宿舍区域 @ynufe是教学区域
+    password = "yourPassword"      # 修改为实际密码
 
-    print(json.dumps(result, indent=2))
+    try:
+        if choice == "1":
+            result = login(username, password, auto_detect=True)
+        elif choice == "2":
+            result = logout(username, auto_detect=True)
+        else:
+            print("错误：无效选项，请输入 1 或 2")
+            exit(1)
+
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    except Exception as e:
+        print(f"操作失败: {str(e)}")
