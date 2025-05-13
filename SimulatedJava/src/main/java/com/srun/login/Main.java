@@ -1,15 +1,14 @@
 package com.srun.login;
 
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.srun.login.utils.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import com.google.gson.Gson;
 
@@ -18,6 +17,7 @@ public class Main {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36 Edg/136.0.0.0";
     private static final String GET_CHALLENGE_API = "http://172.16.130.31/cgi-bin/get_challenge";
     private static final String SRUN_PORTAL_API = "http://172.16.130.31/cgi-bin/srun_portal";
+    private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final int N = 200;
     private static final int AC_ID = 7;
     private static final String ENC_VER = "srun_bx1";
@@ -45,11 +45,11 @@ public class Main {
             switch (choice) {
                 case 1:
                     Map<String, Object> loginResult = login(username, password, "", true);
-                    System.out.println(new Gson().toJson(loginResult));
+                    System.out.println(PRETTY_GSON.toJson(loginResult));
                     break;
                 case 2:
                     Map<String, Object> logoutResult = logout(username, "", true);
-                    System.out.println(new Gson().toJson(logoutResult));
+                    System.out.println(PRETTY_GSON.toJson(logoutResult));
                     break;
                 default:
                     System.out.println("错误：无效选项，请输入 1 或 2");
@@ -165,12 +165,18 @@ public class Main {
     }
 
     private static Map<String, Object> parseJsonp(String jsonp) {
-        Map<String, Object> result = new HashMap<>();
-        if (jsonp.startsWith("sdu(") && jsonp.endsWith(")")) {
-            String jsonStr = jsonp.substring(4, jsonp.length() - 1);
-            result.put("res", jsonStr);
+        try {
+            if (jsonp.startsWith("sdu(") && jsonp.endsWith(")")) {
+                String jsonStr = jsonp.substring(4, jsonp.length() - 1);
+                // 直接解析为结构化Map
+                return new Gson().fromJson(jsonStr, new TypeToken<Map<String, Object>>(){}.getType());
+            }
+            return Collections.singletonMap("error", "Invalid JSONP format");
+        } catch (Exception e) {
+            Map<String, Object> errResult = new HashMap<>();
+            errResult.put("error", "Failed to parse response: " + e.getMessage());
+            return errResult;
         }
-        return result;
     }
 
     public static Map<String, String> getChallenge(String username, String clientIp) throws IOException {
