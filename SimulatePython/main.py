@@ -3,10 +3,10 @@ import time
 import json
 import socket
 from typing import Dict, Tuple
-from encryption.base64 import CustomB64Encoder
-from encryption.encode import x_encode
-from encryption.md5 import get_hmd5
-from encryption.sha1 import get_chksum
+from encryption.Encode import encode as srun_encode
+from encryption.Base64 import custom_b64encode
+from encryption.Md5 import get_hmd5
+from encryption.Sha1 import get_chksum
 
 # ---------------------------- 全局配置 ----------------------------
 header = {
@@ -83,10 +83,10 @@ def get_info(username: str, password: str, ip: str, token: str) -> str:
         "enc_ver": enc_ver
     }, separators=(',', ':'))
 
-    xen_bytes = x_encode(info_json, token)
+    encrypted_bytes = srun_encode(info_json, token)
 
-    encoder = CustomB64Encoder()
-    return "{SRBX1}" + encoder.encode(xen_bytes)
+    encoded_str = custom_b64encode(encrypted_bytes)
+    return "{SRBX1}" + encoded_str
 
 
 # ---------------------------- 主流程 ----------------------------
