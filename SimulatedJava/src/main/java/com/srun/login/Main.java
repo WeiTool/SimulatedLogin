@@ -50,7 +50,7 @@ public class Main {
             return;
         }
 
-        String username = "202305006401@ynufe"; // 硬编码用户名（可改为动态输入）
+        String username = "202305006401@ctc"; // 硬编码用户名（可改为动态输入）
         String password = "299053xyh";         // 硬编码密码（可改为动态输入）
 
         try {

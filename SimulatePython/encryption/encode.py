@@ -1,7 +1,7 @@
 import struct
 
 
-def s(a: str, add_length: bool) -> list:
+def mix(a: str, add_length: bool) -> list:
     """
     将字符串转换为32位无符号整数数组（小端序）
 
@@ -40,7 +40,7 @@ def s(a: str, add_length: bool) -> list:
     return v
 
 
-def l(a: list, truncate: bool) -> bytes:
+def dmix(a: list, truncate: bool) -> bytes:
     """
     将32位整数数组还原为二进制字符串
 
@@ -79,10 +79,10 @@ def encode(str_data: str, key: str) -> bytes:
 
     # 1. 数据预处理 -------------------------------------------------
     # 将输入字符串转换为32位整型数组（小端序），并添加原始长度标记
-    v = s(str_data, add_length=True)
+    v = mix(str_data, add_length=True)
 
     # 将密钥转换为32位整型数组，并填充至4个元素
-    k = s(key, add_length=False)
+    k = mix(key, add_length=False)
     if len(k) < 4:
         k += [0] * (4 - len(k))  # 不足4个元素时填充0
 
@@ -121,4 +121,4 @@ def encode(str_data: str, key: str) -> bytes:
         z = v[n]
 
     # 4. 结果转换 -------------------------------------------------
-    return l(v, truncate=False)
+    return dmix(v, truncate=False)
