@@ -49,6 +49,7 @@ python在下面的运行代码中
 ---
 
 ## 开源协议
+本项目仅用于学习，请勿用于非法或商业用途，遵循学校的网络校规
 本项目基于 GPL-3.0 协议开源，部分代码参考自 [srun](https://github.com/zu1k/srun) 的实现思路。
 
 > 更多技术细节请参考：[CSDN原理解析](https://blog.csdn.net/qq_41797946/article/details/89417722) | [GitHub项目文档](https://github.com/zu1k/srun)
